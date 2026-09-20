@@ -7,11 +7,13 @@ public static class ActivatorUtilities
     #region InstanceBuilder
     private static readonly NullabilityInfoContext _nullabilityCtx = new();
     // resolveParameter: parameterType, allowNullable, resolvedParam
+    /// <exception cref="InitiateAbstractsException"/>
+    /// <exception cref="NoSuitableConstructorException"/>
     private static object CreateInstance(Type instanceType, Func<Type, bool, object?> resolveParameter)
     {
         // validate implement is instantiatable
         if (instanceType.IsInterface || instanceType.IsAbstract)
-            throw new InvalidOperationException($"Cannot instantiate abstract type or interface '{instanceType.Name}'.");
+            throw new InitiateAbstractsException(instanceType);
         // construct
         var constructors = instanceType.GetConstructors().OrderByDescending(c => c.GetParameters().Length);
         var errorList = new List<Exception>();
@@ -63,10 +65,12 @@ public static class ActivatorUtilities
                 errorList.Add(e);
             }
         }
-        throw new InvalidOperationException($"No suitable constructor found for {instanceType.Name}",
-            innerException: new AggregateException(errorList));
+        throw new NoSuitableConstructorException(instanceType, errorList);
     }
     // queryFromCache: requiredType, allowNullable, queryResult
+    /// <exception cref="CircularDependencyException"/>
+    /// <exception cref="InitiateAbstractsException"/>
+    /// <exception cref="NoSuitableConstructorException"/>
     private static object Resolver(
         Type type,
         Func<Type, bool, object?> queryFromCache,
@@ -83,7 +87,7 @@ public static class ActivatorUtilities
                 return r;
             // validate circular dependency
             if (resolvingStack.Contains(type))
-                throw new InvalidOperationException($"Circular dependency detected for type '{type.Name}'.");
+                throw new CircularDependencyException(type);
             // begin resolve with stack
             resolvingStack.Push(type);
             var implementType = getInstanceType(type);
@@ -101,6 +105,10 @@ public static class ActivatorUtilities
     }
 
     #region Service
+    /// <exception cref="CircularDependencyException"/>
+    /// <exception cref="InitiateAbstractsException"/>
+    /// <exception cref="NoSuitableConstructorException"/>
+    /// <exception cref="ServiceUnregisteredException"/>
     public static object ServiceConstructorInvoker(
         Type serviceType,
         Func<Type, object?> additionalResolve,
@@ -128,7 +136,7 @@ public static class ActivatorUtilities
             {
                 if (allowNullable)
                     return null;
-                throw new InvalidOperationException($"Service type {type.Name} unregistered.");
+                throw new ServiceUnregisteredException(type);
             }
             if (temporaryCache.TryGetValue(type, out var temp))
                 return temp;
@@ -164,7 +172,7 @@ public static class ActivatorUtilities
                 singletons[type] = instance;
         }
     }
-
+    /// <exception cref="ServiceUnregisteredException"/>
     public static TService ServiceConstructorInvoker<TService>(
         Func<Type, object?> additionalResolve,
         IDictionary<Type, object> singletons,
@@ -174,6 +182,9 @@ public static class ActivatorUtilities
     #endregion
 
     #region Instance
+    /// <exception cref="CircularDependencyException"/>
+    /// <exception cref="InitiateAbstractsException"/>
+    /// <exception cref="NoSuitableConstructorException"/>
     public static object InstanceConstructorInvoker(
          Type instanceType,
          IDictionary<Type, object> cachedInstances,

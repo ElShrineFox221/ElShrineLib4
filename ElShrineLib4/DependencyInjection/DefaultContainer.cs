@@ -57,6 +57,7 @@ public sealed class DefaultContainer : IContainer, IDisposable
             return source ?? this;
         return null;
     }
+
     private object? GetServiceInternal(object? source, Type type, ConcurrentDictionary<Type, object> scopeds, bool allowScopeds)
     {
         var preResolve = ResolveContainer(type, source);
@@ -65,13 +66,18 @@ public sealed class DefaultContainer : IContainer, IDisposable
         if (TryGetServiceInfo(type, out var info))
         {
             if (!allowScopeds && info.Lifetime == ServiceLifetime.Scoped)
-                throw new InvalidOperationException($"Scoped service {type.Name} cannot be directly resolved with container.");
+                throw new ResolveScopedServiceInGlobalContainerException(type);
             return ActivatorUtilities.ServiceConstructorInvoker(type, t => ResolveContainer(t, source), _singletons, scopeds, _serviceRegs);
         }
         if (!AllowUnregistered)
-            throw new InvalidOperationException($"Type {type.Name} is not registered.");
+            throw new ServiceUnregisteredException(type);
         return ActivatorUtilities.InstanceConstructorInvoker(type, _singletons, _typeMap, cacheUnmappeds: false);
     }
+    /// <exception cref="CircularDependencyException"/>
+    /// <exception cref="InitiateAbstractsException"/>
+    /// <exception cref="NoSuitableConstructorException"/>
+    /// <exception cref="ServiceUnregisteredException"/>
+    /// <exception cref="ResolveScopedServiceInGlobalContainerException"/>
     public object? GetService(Type serviceType)
         => GetServiceInternal(this, serviceType, _emptyScopeds, false);
 
