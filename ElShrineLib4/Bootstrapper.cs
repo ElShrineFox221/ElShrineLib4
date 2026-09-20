@@ -16,8 +16,6 @@ public static class Bootstrapper
     private static readonly object _initLock = new();
     private static void InitializeModules(IContainer container, ModuleFlags modules)
     {
-        /*if ((modules & ModuleFlags.TickTimer) != 0)
-            container.TryRegister<ITickListenerFactory, DefaultTickTimer>(ServiceLifetime.Singleton);*/
         if ((modules & (ModuleFlags.Log | ModuleFlags.VirtualLog)) != 0)
         {
             container.TryRegister<ILogSessionFactory, LogSessionFactory>(ServiceLifetime.Singleton);

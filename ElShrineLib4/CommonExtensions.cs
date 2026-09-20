@@ -2,9 +2,21 @@
 
 namespace ElShrine;
 
-public static class Extensions
+public static class CommonExtensions
 {
     #region array, list, collection, etc
+    public static bool DictionaryEqual<TK, TV>(this IReadOnlyDictionary<TK, TV> a, IReadOnlyDictionary<TK, TV> b)
+    {
+        if (a.Count != b.Count)
+            return false;
+        foreach (var item in a)
+        {
+            if (b.TryGetValue(item.Key, out var value) && Equals(item.Value, value))
+                continue;
+            return false;
+        }
+        return true;
+    }
     public static T[] Slice<T>(this IEnumerable<T> values, int startIndex, int endIndex)
         => [.. values.Skip(startIndex).Take(endIndex - startIndex + 1)];
 
@@ -40,6 +52,19 @@ public static class Extensions
     #endregion
 
     #region string & char
+
+    #region pural
+    public static string GetPural(this string str, int num)
+        => str.GetPural(int.Abs(num) > 1);
+    public static string GetPural(this string str, bool isPural)
+        => !isPural ? str :
+        str.EndsWith('s') || str.EndsWith('x') || str.EndsWith('z') ||
+        str.EndsWith("sh") || str.EndsWith("ch") ? str + "es" :
+        str.EndsWith('y') && str.Length > 1 && !"aeiou".Contains(str[^2]) ?
+        str[..^1] + "ies" : str + "s";
+    public static string GetPuralWithNum(this string str, int num)
+        => $"{num} {str.GetPural(num)}";
+    #endregion
 
     #region width calculation
     public static bool IsFullChar(this char c)
