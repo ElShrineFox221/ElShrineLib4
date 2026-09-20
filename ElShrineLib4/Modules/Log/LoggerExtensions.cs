@@ -27,6 +27,15 @@ public static class LoggerExtensions
         => logger.Log(EntryType.Error, item, flowKey);
     public static void Error(this ILogger logger, params LogItem[] items)
         => logger.Log(EntryType.Error, new EntryContent(items));
+
+    public static LogItem[] ToLogItems(this Exception ex)
+    {
+        var headerText = ex.GetType().Name.Replace(nameof(Exception), string.Empty);
+        var header = string.IsNullOrWhiteSpace(headerText) ? LogItems.Error : headerText.Error().Brackets();
+        var msg = $" {ex.Message}".Error();
+        var trace = $"\nTrace:\n{ex.StackTrace}".SubInfo();
+        return [header, msg, trace];
+    }
     #endregion
 
     #region Warning

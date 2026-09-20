@@ -17,6 +17,8 @@ public record LogItem(string Text, LogItemStyle Style, LogItemFormat Format)
     }
 
     #region operator +
+    public static implicit operator LogItem(string text)
+        => text.Info();
     public static LogItem operator +(LogItem left, string right)
         => new(left.Text + right, left.Style, left.Format);
     public static LogItem operator +(string left, LogItem right)
