@@ -1,4 +1,4 @@
-﻿namespace ElShrine.DependencyInjection;
+namespace ElShrine.DependencyInjection;
 
 public enum ServiceLifetime
 {

@@ -18,16 +18,16 @@ public static class Bootstrapper
     {
         if ((modules & (ModuleFlags.Log | ModuleFlags.VirtualLog)) != 0)
         {
-            container.TryRegister<ILogSessionFactory, LogSessionFactory>(ServiceLifetime.Singleton);
+            container.Register<ILogSessionFactory, LogSessionFactory>(ServiceLifetime.Singleton);
             if ((modules & ModuleFlags.Log) != 0)
             {
-                container.TryRegister<ILogWriter, LogStore>(ServiceLifetime.Singleton);
-                container.TryRegister<ILogReader, LogStore>(ServiceLifetime.Singleton);
+                container.Register<ILogWriter, LogStore>(ServiceLifetime.Singleton);
+                container.Register<ILogReader, LogStore>(ServiceLifetime.Singleton);
             }
             else
             {
-                container.TryRegister<ILogWriter, LogVirtualStore>(ServiceLifetime.Singleton);
-                container.TryRegister<ILogReader, LogVirtualStore>(ServiceLifetime.Singleton);
+                container.Register<ILogWriter, LogVirtualStore>(ServiceLifetime.Singleton);
+                container.Register<ILogReader, LogVirtualStore>(ServiceLifetime.Singleton);
             }
         }
         /*if ((modules & ModuleFlags.Plugin) != 0)
@@ -61,7 +61,7 @@ public static class Bootstrapper
         _readyCallbacks.Clear();
     }
     public static void Initialize(ModuleFlags modules, Action<IContainer>? configure = null, Action<IServiceProvider>? onReady = null)
-        => Initialize(new DefaultContainer(), modules, configure, onReady);
+        => Initialize(DependencyInjection.Container.CreateRoot(), modules, configure, onReady);
 
     #region ReadyCallback
     private sealed record ReadyCallback(int Priority, Action<IServiceProvider> Action);
@@ -88,7 +88,7 @@ public static class Bootstrapper
     }
     public static TIns Resolve<TIns>() where TIns : class
         => (TIns)Resolve(typeof(TIns));
-    public static IServiceScope CreateScope()
+    public static IContainer CreateScope()
         => Container.CreateScope();
     #endregion
 }
