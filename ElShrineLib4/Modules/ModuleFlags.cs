@@ -20,7 +20,12 @@ public enum ModuleFlags
     /// </summary>
     VirtualLog = 4,
 
-    // Plugin = 8,
+    /// <summary>
+    /// Plugin system. Discovers plugins under the configured root folder, one collectible
+    /// load context per folder, and supports hot load/unload/reload with container isolation.
+    /// <para>Use <see cref="Modules.Plugin.IPluginManager"/> to scan and manage plugins.</para>
+    /// </summary>
+    Plugin = 8,
 
     // Option = 16,
      

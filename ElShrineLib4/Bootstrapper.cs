@@ -1,6 +1,7 @@
 ﻿using ElShrine.DependencyInjection;
 using ElShrine.Modules;
 using ElShrine.Modules.Log;
+using ElShrine.Modules.Plugin;
 using System.Collections.Concurrent;
 
 namespace ElShrine;
@@ -30,9 +31,9 @@ public static class Bootstrapper
                 container.Register<ILogReader, LogVirtualStore>(ServiceLifetime.Singleton);
             }
         }
-        /*if ((modules & ModuleFlags.Plugin) != 0)
-            container.TryRegister<IPluginManager, PluginManager>(ServiceLifetime.Singleton);
-        if ((modules & ModuleFlags.Option) != 0)
+        if ((modules & ModuleFlags.Plugin) != 0)
+            container.Register<IPluginManager, PluginManager>(ServiceLifetime.Singleton);
+        /*if ((modules & ModuleFlags.Option) != 0)
             container.TryRegister<IOptionManager, OptionManager>(ServiceLifetime.Singleton);
         if ((modules & ModuleFlags.Command) != 0)
             container.TryRegister<ICommandManager, CommandsManager>(ServiceLifetime.Singleton);
