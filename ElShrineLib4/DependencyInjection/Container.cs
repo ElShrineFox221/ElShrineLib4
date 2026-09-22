@@ -45,29 +45,30 @@ public sealed class Container : IContainer
         }
     }
 
-    public void Register<TService, TImplementation>(ServiceLifetime lifetime)
-        where TService : notnull
-        where TImplementation : class, TService
+    public void Register(Type serviceType, Type implementationType, ServiceLifetime lifetime)
     {
+        ArgumentNullException.ThrowIfNull(serviceType);
+        ArgumentNullException.ThrowIfNull(implementationType);
         lock (_sync)
         {
             ThrowIfDisposed();
-            var serviceType = typeof(TService);
-            var implementationType = typeof(TImplementation);
             if (implementationType.IsAbstract)
                 throw new AbstractImplementationException(serviceType, implementationType);
             _registrations[serviceType] = new ServiceInfo(implementationType, lifetime);
         }
     }
 
-    public void Register<TService>(TService instance)
-        where TService : class
+    public void Register(Type serviceType, object instance)
     {
+        ArgumentNullException.ThrowIfNull(serviceType);
         ArgumentNullException.ThrowIfNull(instance);
+        if (!serviceType.IsInstanceOfType(instance))
+            throw new ArgumentException(
+                $"Instance of type '{instance.GetType().FullName}' is not assignable to service type '{serviceType.FullName}'.",
+                nameof(instance));
         lock (_sync)
         {
             ThrowIfDisposed();
-            var serviceType = typeof(TService);
             _registrations[serviceType] = new ServiceInfo(instance.GetType(), ServiceLifetime.Singleton);
             _instances[serviceType] = instance;
         }

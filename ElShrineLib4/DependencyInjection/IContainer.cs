@@ -2,10 +2,7 @@ namespace ElShrine.DependencyInjection;
 
 public interface IContainer : IServiceNode
 {
-    void Register<TService, TImplementation>(ServiceLifetime lifetime)
-        where TService : notnull
-        where TImplementation : class, TService;
+    void Register(Type serviceType, Type implementationType, ServiceLifetime lifetime);
 
-    void Register<TService>(TService instance)
-        where TService : class;
+    void Register(Type serviceType, object instance);
 }

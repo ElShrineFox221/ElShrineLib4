@@ -7,7 +7,4 @@ public interface IServiceNode : IServiceProvider, IDisposable
     IContainer CreateScope(ScopeOptions options = default);
 
     IServiceNode? GetRegistrationOwner(Type serviceType);
-
-    IServiceNode? GetRegistrationOwner<TService>()
-        => GetRegistrationOwner(typeof(TService));
 }
