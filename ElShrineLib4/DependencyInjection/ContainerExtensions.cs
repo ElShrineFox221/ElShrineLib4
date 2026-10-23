@@ -11,6 +11,10 @@ public static class ContainerExtensions
     public static void Register<TService>(this IContainer container, TService instance)
         where TService : class
         => container.Register(typeof(TService), instance);
+
+    public static void Register<TService>(this IContainer container, ServiceLifetime lifetime = ServiceLifetime.Singleton)
+        where TService : class
+        => container.Register(typeof(TService), lifetime);
     #endregion
 
     #region Resolve
